@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Entry point bundled in WiiCompiled Setup.app. The package contains source and
+# Entry point bundled in WiiCompiled Setup.app. The disk image contains source and
 # tools only; a user's own verified disc is extracted into Application Support.
 set -euo pipefail
 
@@ -27,7 +27,7 @@ WiiCompiled Setup.app, not run directly.
 EOF
 }
 
-game=""; retro_dir=""; install_location=applications
+game=""; retro_dir=""; install_location=user
 while (($#)); do
     case "$1" in
         --game) game=${2:-}; shift 2 ;;
@@ -88,7 +88,7 @@ fi
 [[ -x "$translator" ]] || fail 'the packaged Translator.Cli is missing or not executable'
 [[ -x "$cmake_bin" && -x "$ninja_bin" ]] || fail 'the packaged CMake or Ninja tool is missing'
 if ! /usr/bin/xcode-select -p >/dev/null 2>&1; then
-    notice 'Xcode Command Line Tools are required once to compile WiiCompiled. Click OK, complete the Apple installer, then run WiiCompiled Setup again.'
+    notice 'Xcode Command Line Tools are required once to compile WiiCompiled. Click OK, complete Apple's installer, then run WiiCompiled Setup again.'
     /usr/bin/xcode-select --install || true
     exit 1
 fi
