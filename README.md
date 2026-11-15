@@ -123,9 +123,8 @@ The default install location is your personal `~/Applications` folder, so instal
 require administrator access. On a first run, macOS may ask to install Xcode Command Line Tools; complete
 Apple's installer, then open Setup again.
 
-Setup asks whether to use iTerm2 or Terminal when both are installed; iTerm2 is preselected.
-This is useful on managed Macs where Terminal.app is restricted but iTerm2 is allowed. The chosen
-terminal shows extraction and build progress and any error that needs reporting. The current automated
+Setup opens Terminal to show extraction and build progress and any error that needs reporting.
+The current automated
 build is ad-hoc signed rather than Developer ID notarized; on a Mac that blocks it, Control-click
 `WiiCompiled Setup.app`, choose **Open**, and confirm the prompt. Managed devices may enforce stricter
 app policies that cannot be overridden by this step.
