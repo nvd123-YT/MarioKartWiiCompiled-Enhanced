@@ -127,6 +127,11 @@ Setup opens Terminal while it works, so extraction and build progress—and any 
 remain visible. The current automated build is ad-hoc signed rather than Developer ID notarized; on a Mac
 that blocks it, Control-click `WiiCompiled Setup.app`, choose **Open**, and confirm the prompt. Managed
 devices may enforce stricter app policies that cannot be overridden by this step.
+
+> [!CAUTION]
+> Only use builds from this repository's [Releases](https://github.com/nvd123-YT/MarioKartWiiCompiled-Enhanced/releases)
+> page. Avoid installers shared through Discord or third-party download sites.
+
 ## A note on related projects
 
 WiiCompiled, Wheel Wizard, Retro rewind and other related projects are developed
