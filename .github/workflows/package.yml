@@ -237,12 +237,13 @@ jobs:
         run: |
           package_version="$PACKAGE_VERSION"
           if [[ -z "$package_version" ]]; then
-            if [[ "${TAG_VERSION:-}" =~ ^v?[0-9] ]]; then
-              package_version="${TAG_VERSION#v}"
-            elif [[ -f "Launcher/Directory.Build.props" ]]; then
-              package_version=$(grep -m1 '<Version>' Launcher/Directory.Build.props | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
+            if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
+              package_version="${GITHUB_REF_NAME#v}"
+            else
+              package_version="$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("Launcher/Directory.Build.props").getroot(); value = root.findtext("./PropertyGroup/Version"); assert value and value.strip(), "Version is missing"; print(value.strip())')"
             fi
           fi
+          echo "Building setup package version: $package_version"
           mkdir -p Launcher/dist
           Launcher/macos/build-setup-dmg.command \
             --nodtool-arm64 Launcher/artifacts/macos/nodtool-arm64 \
