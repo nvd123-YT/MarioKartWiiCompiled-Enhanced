@@ -215,13 +215,6 @@ AI coding tools were used during development. Translated output is validated aga
 ## Credits
 
 - **[Patchzzy (@patchzyy)](https://github.com/patchzyy)** — creator of the original [WiiCompiled project](https://github.com/patchzyy/Wiicompiled), which this fork is based on.
-- **inkwreck** — original WiiCompiled logo artwork.
-- **[Aurora](https://github.com/encounter/aurora)** — the GameCube/Wii graphics and windowing compatibility layer used by the rendering backend.
-- **[Dawn](https://dawn.googlesource.com/dawn)** — Google's WebGPU implementation, used by Aurora's Direct3D, Vulkan, and OpenGL backends.
-- **[Dolphin Emulator](https://github.com/dolphin-emu/dolphin)** — an important reference for Wii hardware behavior and the source of third-party data files documented in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-- **[Retro Rewind](https://wiki.tockdom.com/wiki/Retro_Rewind)** by ZPL and its team — the mod distribution supported as a static profile.
-- **[Wheel Wizard](https://github.com/TeamWheelWizard/WheelWizard)** — the mod manager this project integrates with as a setup and launch backend.
-- The wider GameCube/Wii and static-recompilation communities.
 
 Third-party components, licenses, and redistribution notices are documented in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
