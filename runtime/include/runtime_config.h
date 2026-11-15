@@ -684,6 +684,16 @@ inline bool SetPauseOnFocusLost(bool value) {
     return WriteSetting("video", "pause_on_focus_lost", value ? "true" : "false");
 }
 
+inline bool SetTextureReplacements(bool value) {
+    Mutable().textureReplacements = value;
+    return WriteSetting("video", "texture_replacements", value ? "true" : "false");
+}
+
+inline bool SetTextureDumps(bool value) {
+    Mutable().textureDumps = value;
+    return WriteSetting("video", "texture_dumps", value ? "true" : "false");
+}
+
 inline bool SetDisableCopyFilter(bool value) {
     Mutable().disableCopyFilter = value;
     return WriteSetting("video", "disable_copy_filter", value ? "true" : "false");

@@ -113,6 +113,8 @@ int g_displayMode = [] {
 bool g_skipUnreadyPipelines = RuntimeConfigFile::SkipUnreadyPipelines(true);
 bool g_vsync = RuntimeConfigFile::Vsync();
 bool g_pauseOnFocusLost = RuntimeConfigFile::PauseOnFocusLost(false);
+bool g_textureReplacements = RuntimeConfigFile::TextureReplacements(false);
+bool g_textureDumps = RuntimeConfigFile::TextureDumps(false);
 bool g_disableCopyFilter = RuntimeConfigFile::DisableCopyFilter(true);
 bool g_showFps = RuntimeConfigFile::ShowFps(true);
 bool g_forceAspect = RuntimeConfigFile::ForceAspectEnabled();
@@ -1293,6 +1295,22 @@ void DrawGraphicsSettings() {
     if (ImGui::Checkbox("Show FPS", &g_showFps)) {
         RuntimeConfigFile::SetShowFps(g_showFps);
     }
+    ImGui::SeparatorText("Custom texture packs");
+    if (ImGui::Checkbox("Load texture replacements (restart required)", &g_textureReplacements)) {
+        RuntimeConfigFile::SetTextureReplacements(g_textureReplacements);
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("Loads matching .dds and .png replacements from the texture_replacements folder next to Config.toml. Restart to apply.");
+    }
+    ImGui::BeginDisabled(!g_textureReplacements);
+    if (ImGui::Checkbox("Dump unmatched textures (restart required)", &g_textureDumps)) {
+        RuntimeConfigFile::SetTextureDumps(g_textureDumps);
+    }
+    ImGui::EndDisabled();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+        ImGui::SetTooltip("Writes unmatched textures to Cache/texture_dumps using replacement-compatible filenames. Requires texture replacements.");
+    }
+    ImGui::TextDisabled("Changes take effect after restarting the game.");
     ImGui::Separator();
     ImGui::Text("Graphics API: %s", GraphicsApiDisplayName());
 }

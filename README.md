@@ -68,8 +68,8 @@ Known Wii Remote limitations:
 
 ### More built-in features
 
-- **Dolphin-style custom texture replacements.** Enable `texture_replacements = true` under `[video]` in `Config.toml`, then place matching `.dds` or `.png` replacements in the `texture_replacements` folder inside WiiCompiled's user-data directory. Aurora indexes this folder when the game starts, so restart after adding or changing textures.
-- **Texture dumping for pack creation.** Set `texture_dumps = true` under `[video]` as well as enabling texture replacements. Unmatched textures are written to `Cache/texture_dumps` with replacement-compatible filenames, giving you a starting point for creating your own pack. Dumping is only active when texture replacements are enabled.
+- **In-game custom texture pack controls.** Open F10 → Graphics → Custom texture packs to enable Dolphin-style replacements or texture dumping; both options are saved in `Config.toml` and require a restart. Place matching `.dds` or `.png` files in the `texture_replacements` folder inside WiiCompiled's user-data directory. Aurora indexes this folder at startup.
+- **Texture dumping for pack creation.** Turn on **Dump unmatched textures** in the same F10 menu. Unmatched textures are written to `Cache/texture_dumps` with replacement-compatible filenames, giving you a starting point for creating your own pack. Dumping is only available while texture replacements are enabled.
 - **Portable user-data mode.** Put an empty file named `portable.txt` in a writable folder containing the game executable or one of its parent folders (up to four levels above it). WiiCompiled then stores `Config.toml`, NAND data, cache, and logs in a `UserData` folder beside that marker instead of using the normal per-user application-data location. This is useful when keeping an installation and its user data together on an external drive.
 - **Friend-code clipboard paste for Retro Rewind.** On the Register Friend page, enter a code with the keyboard or paste it with **Ctrl+V** (Windows/Linux) or **Command+V** (macOS). The input accepts up to 12 digits and ignores spaces, hyphens, and other non-digit characters.
 
