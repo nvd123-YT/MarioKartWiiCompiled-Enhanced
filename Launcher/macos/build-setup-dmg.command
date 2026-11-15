@@ -196,8 +196,7 @@ cat > "$image_root/README.txt" <<EOF
 WiiCompiled Setup $version
 
 1. Open WiiCompiled Setup.app (or drag it to Applications first).
-2. Choose iTerm2 or Terminal for visible build progress (iTerm2 is preselected
-   when both are installed).
+2. Terminal opens automatically to show setup and build progress.
 3. Choose your own clean Mario Kart Wii disc image when prompted.
 4. The setup builds locally and installs the resulting app under ~/Applications
    by default; administrator access is not needed for that user-level install.
