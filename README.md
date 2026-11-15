@@ -100,36 +100,7 @@ Only the clean PAL, NTSC-U, and NTSC-J revisions will work. Anything else (NTSC-
 > Nobody here will tell you where to get the game. Dumping your own disc is on you, and links to
 > game files won't be provided or tolerated.
 
-## Installing
 
-For an easy experience, use [Wheel Wizard](https://github.com/TeamWheelWizard/WheelWizard). Pick your clean PAL `RMCP01`, NTSC-U `RMCE01`, or NTSC-J `RMCJ01`
-image under Settings, turn on **WiiCompiled (beta)**, and hit install from the Home page.
-Wheel Wizard downloads the setup tool from this repo and walks you through install, updates and
-launching. The backend itself is deliberately command-line only, Wheel Wizard is a wrapper around it.
-
-### macOS
-
-Download `WiiCompiled-Setup.dmg` from this repository's Releases page and open it in Finder. Open
-`WiiCompiled Setup.app` directly from the mounted image, or drag it to Applications first. The
-universal setup includes native tools for both Apple Silicon (`arm64`) and Intel (`x86_64`) Macs.
-
-Choose your clean PAL `RMCP01`, NTSC-U `RMCE01`, or NTSC-J `RMCJ01` disc image, then select either
-the base game or Retro Rewind. For Retro Rewind, choose the `RetroRewind6` folder or its parent folder.
-Setup verifies and extracts the image locally, then translates and compiles the native app on your Mac.
-
-The default install location is your personal `~/Applications` folder, so installing the game does not
-require administrator access. On a first run, macOS may ask to install Xcode Command Line Tools; complete
-Apple's installer, then open Setup again.
-
-Setup opens Terminal to show extraction and build progress and any error that needs reporting.
-The current automated
-build is ad-hoc signed rather than Developer ID notarized; on a Mac that blocks it, Control-click
-`WiiCompiled Setup.app`, choose **Open**, and confirm the prompt. Managed devices may enforce stricter
-app policies that cannot be overridden by this step.
-
-> [!CAUTION]
-> Only use builds from this repository's [Releases](https://github.com/nvd123-YT/MarioKartWiiCompiled-Enhanced/releases)
-> page. Avoid installers shared through Discord or third-party download sites.
 
 ## A note on related projects
 
@@ -213,24 +184,6 @@ GitHub so we can take a look at it.
 ## AI usage
 AI coding tools were used during development of this project. 
 All translated output is verified against real hardware behavior and most importantly, physics accuracy is proven synced across Wii, Dolphin, and WiiCompiled (see FAQ). 
-
-## Credits
-- **inkwreck** - making the logo
-- **[aurora](https://github.com/encounter/aurora)** - the GX rendering/windowing backend this
-  project's whole graphics layer sits on. MIT licensed.
-- **[Dawn](https://dawn.googlesource.com/dawn)** - Google's WebGPU implementation, powering
-  aurora's Direct3D, Vulkan and OpenGL backends.
-- **[Dolphin Emulator](https://github.com/dolphin-emu/dolphin)** - an invaluable reference for Wii
-  hardware behavior during development, plus the source of the free DSP coefficient ROM and the
-  unmodified default WiiConnect24 bootstrap tree bundled with the runtime.
-- **[Retro Rewind](https://wiki.tockdom.com/wiki/Retro_Rewind)** by ZPL and team - the mod
-  distribution this project supports.
-- **[Wheel Wizard](https://github.com/TeamWheelWizard/WheelWizard)** - the mod manager this
-  project integrates with as a launch backend.
-- Everyone in the static recompilation community.
-
-Bundled third-party components and their licenses live in
-[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
 
 
 ## License
