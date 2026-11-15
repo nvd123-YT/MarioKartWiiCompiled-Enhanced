@@ -109,7 +109,8 @@ jobs:
             mkw_macos_context_abi_tests \
             mkw_macos_host_context_tests \
             mkw_macos_guest_flat_memory_tests \
-            mkw_macos_external_audio_tests
+            mkw_macos_external_audio_tests \
+            mkw_ax_mix_kernel_tests
 
       - name: Test execution substrate
         shell: bash

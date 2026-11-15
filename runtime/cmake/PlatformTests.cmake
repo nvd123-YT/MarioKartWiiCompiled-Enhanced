@@ -25,6 +25,18 @@ if(MKW_BUILD_PSQ_TESTS)
         -P "${MKW_TEST_RUNTIME_DIR}/tests/psq_reserved_tests.cmake")
 endif()
 
+# The AX mixer kernels are hot paths for every audio frame. Compare the selected
+# architecture backend against the scalar reference, including tails and wraparound.
+add_executable(mkw_ax_mix_kernel_tests "${MKW_TEST_RUNTIME_DIR}/tests/ax_mix_kernels_tests.cpp")
+target_include_directories(mkw_ax_mix_kernel_tests PRIVATE
+    "${MKW_TEST_RUNTIME_DIR}/include"
+    "${MKW_TEST_RUNTIME_DIR}/src/hle/audio")
+target_compile_features(mkw_ax_mix_kernel_tests PRIVATE cxx_std_17)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|amd64|x86_64|X86_64)$")
+    target_compile_options(mkw_ax_mix_kernel_tests PRIVATE -march=x86-64-${MKW_X86_CPU_PROFILE})
+endif()
+add_test(NAME mkw_ax_mix_kernel_tests COMMAND mkw_ax_mix_kernel_tests)
+
 add_executable(mkw_platform_paths_tests "${MKW_TEST_RUNTIME_DIR}/tests/platform_paths_tests.cpp")
 target_link_libraries(mkw_platform_paths_tests PRIVATE mkw_platform)
 target_compile_features(mkw_platform_paths_tests PRIVATE cxx_std_17)
