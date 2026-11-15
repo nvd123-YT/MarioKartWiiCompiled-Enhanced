@@ -1421,6 +1421,7 @@ int RuntimeMain(int argc, char** argv) {
         auroraConfig.allowTextureDumps = auroraConfig.allowTextureReplacements &&
                                          RuntimeConfigFile::TextureDumps(false);
         auroraConfig.vsync = RuntimeConfigFile::Vsync();
+        auroraConfig.pauseOnFocusLost = RuntimeConfigFile::PauseOnFocusLost(false);
         auroraConfig.desiredBackend = BACKEND_AUTO;
         const float resolutionMultiplier = RuntimeConfigFile::ResolutionMultiplier(1.0f);
         ConfigureMkwDynamicAspect(configWidescreen, forceAspect,
