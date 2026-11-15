@@ -276,9 +276,11 @@ jobs:
           resources="$app/Contents/Resources"
           launcher_script="$resources/launch-setup.applescript"
           test -f "$launcher_script"
-          grep -Fq 'com.googlecode.iterm2' "$launcher_script"
           grep -Fq 'com.apple.Terminal' "$launcher_script"
-          grep -Fq 'choose from list availableTerminals' "$launcher_script"
+          if grep -Fq 'com.googlecode.iterm2' "$launcher_script"; then
+            echo "::error::The DMG launcher should not require iTerm2."
+            exit 1
+          fi
           /usr/bin/osacompile -o "$RUNNER_TEMP/wiicompiled-setup-launcher.scpt" "$launcher_script"
           for arch in arm64 x86_64; do
             for tool in nodtool Translator.Cli ninja; do
