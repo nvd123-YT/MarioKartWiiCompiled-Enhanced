@@ -124,28 +124,13 @@ cat > "$app/Contents/Info.plist" <<EOF
 EOF
 cat > "$app/Contents/MacOS/WiiCompiledSetup" <<'EOF'
 #!/usr/bin/env bash
+set -euo pipefail
 resources="$(cd "$(dirname "$0")/../Resources" && pwd)"
-
-# Finder launches an app with no terminal attached. The setup work deliberately
-# writes human-readable build progress to stdout, so run its .command entry
-# point in Terminal instead of discarding that output behind an inert app icon.
-exec /usr/bin/osascript - "$resources/setup.command" "$@" <<'APPLESCRIPT'
-on run argv
-    set commandLine to quoted form of (item 1 of argv)
-    if (count of argv) > 1 then
-        repeat with argumentIndex from 2 to (count of argv)
-            set commandLine to commandLine & " " & quoted form of (item argumentIndex of argv)
-        end repeat
-    end if
-    tell application "Terminal"
-        activate
-        do script commandLine
-    end tell
-end run
-APPLESCRIPT
+exec /usr/bin/osascript "$resources/launch-setup.applescript" "$resources/setup.command" "$@"
 EOF
 chmod +x "$app/Contents/MacOS/WiiCompiledSetup"
 copy_clean "$script_dir/setup.command" "$resources/setup.command"; chmod +x "$resources/setup.command"
+copy_clean "$script_dir/launch-setup.applescript" "$resources/launch-setup.applescript"
 copy_clean "$script_dir/sync-workspace.command" "$resources/sync-workspace.command"; chmod +x "$resources/sync-workspace.command"
 # Copy only the build inputs. This deliberately avoids a maintainer's ignored
 # output directories, local disc extraction, and developer-only packaging.
@@ -211,8 +196,10 @@ cat > "$image_root/README.txt" <<EOF
 WiiCompiled Setup $version
 
 1. Open WiiCompiled Setup.app (or drag it to Applications first).
-2. Choose your own clean Mario Kart Wii disc image when prompted.
-3. The setup builds locally and installs the resulting app under ~/Applications
+2. Choose iTerm2 or Terminal for visible build progress (iTerm2 is preselected
+   when both are installed).
+3. Choose your own clean Mario Kart Wii disc image when prompted.
+4. The setup builds locally and installs the resulting app under ~/Applications
    by default; administrator access is not needed for that user-level install.
 
 The disk image contains setup tools and source code only. It does not contain
