@@ -60,7 +60,7 @@ jobs:
 
   linux-appimage:
     needs: validate-release-version
-    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') && github.event_name != 'pull_request' }}
+    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') }}
     name: Linux (AppImage, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -106,7 +106,7 @@ jobs:
 
   windows-installer:
     needs: validate-release-version
-    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') && github.event_name != 'pull_request' }}
+    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') }}
     name: Windows (installer exe)
     runs-on: windows-latest
     steps:
