@@ -13,8 +13,6 @@ anywhere at runtime.
 > toolchain, the translation runs on your machine against your disc image, and nothing ever gets
 > uploaded.
 
-[What is a github, I just want to play](https://github.com/TeamWheelWizard/WheelWizard/releases/latest)
-
 ---
 
 ## What it does
