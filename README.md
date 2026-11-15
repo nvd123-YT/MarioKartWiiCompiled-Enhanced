@@ -21,6 +21,7 @@ WiiCompiled translates the game's PowerPC code into native code before launch. T
 - **Resizable aspect ratio.** Resize the game window to different shapes and sizes; the camera adjusts dynamically.
 - **Native rendering through [Aurora](https://github.com/encounter/aurora).** The graphics layer uses Aurora, a source-level GameCube and Wii compatibility layer.
 - **Higher internal resolution.** Render the game at multiples of the original console resolution.
+- **Automatic focus pause.** Optionally pause gameplay when the window loses focus or is minimized, then resume when you return. Enable **Pause when unfocused or minimized** under F10 → Graphics; it is off by default.
 - **MetalFX spatial upscaling.** The in-game settings bar exposes MetalFX spatial upscaling on supported macOS GPUs.
 
 ### Audio
@@ -39,6 +40,7 @@ Press **F10** while the game window is focused to open the settings bar. It incl
 - Internal rendering resolution
 - FPS counter
 - MetalFX spatial upscaling on supported macOS GPUs
+- Automatic pause while the game window is unfocused or minimized
 - Assignment of controllers to all four GameCube controller ports
 - Per-controller button mapping, including bumpers
 - Dolphin-syntax input expressions and direct `GCPadNew.ini` import
