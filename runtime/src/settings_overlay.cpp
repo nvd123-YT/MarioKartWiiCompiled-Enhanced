@@ -112,6 +112,7 @@ int g_displayMode = [] {
 }();
 bool g_skipUnreadyPipelines = RuntimeConfigFile::SkipUnreadyPipelines(true);
 bool g_vsync = RuntimeConfigFile::Vsync();
+bool g_pauseOnFocusLost = RuntimeConfigFile::PauseOnFocusLost(false);
 bool g_disableCopyFilter = RuntimeConfigFile::DisableCopyFilter(true);
 bool g_showFps = RuntimeConfigFile::ShowFps(true);
 bool g_forceAspect = RuntimeConfigFile::ForceAspectEnabled();
@@ -1199,6 +1200,13 @@ void DrawGraphicsSettings() {
         } else {
             g_displayMode = static_cast<int>(activeMode);
         }
+    }
+    if (ImGui::Checkbox("Pause when unfocused or minimized", &g_pauseOnFocusLost)) {
+        aurora_set_pause_on_focus_lost(g_pauseOnFocusLost);
+        RuntimeConfigFile::SetPauseOnFocusLost(g_pauseOnFocusLost);
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("Pause gameplay while this window is out of focus or minimized. It resumes when you return.");
     }
     if (g_displayMode == AURORA_DISPLAY_MODE_EXCLUSIVE) {
         ImGui::TextDisabled(
