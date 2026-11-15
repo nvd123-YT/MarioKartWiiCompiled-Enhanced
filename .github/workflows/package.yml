@@ -135,7 +135,20 @@ jobs:
     if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') }}
     name: macOS (universal drag-and-drop DMG)
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
+      - name: Runner diagnostics (package job start)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Starting macOS setup package job"
+          echo "Commit: $GITHUB_SHA"
+          echo "Ref: $GITHUB_REF"
+          date -u
+          uname -a
+          sw_vers
+          xcode-select -p
+
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
