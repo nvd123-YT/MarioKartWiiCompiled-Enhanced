@@ -46,6 +46,7 @@ struct RuntimeUserConfig {
     std::optional<bool> metalFxSpatialUpscaling;
     std::optional<bool> skipUnreadyPipelines;
     std::optional<bool> vsync;
+    std::optional<bool> pauseOnFocusLost;
     std::optional<bool> gxWorker;
     std::optional<bool> disableCopyFilter;
     std::optional<bool> textureReplacements;
@@ -286,6 +287,8 @@ inline void EnsureConfigFile() {
               "graphics_api = \"auto\"\n"
               "skip_unready_pipelines = true\n"
               "vsync = false\n"
+              "# Pause the game while its window is unfocused or minimized.\n"
+              "pause_on_focus_lost = false\n"
               "# Runs GX command processing on its own thread. Read once, at startup.\n"
               "gx_worker = true\n"
               "disable_copy_filter = true\n"
@@ -461,6 +464,7 @@ inline RuntimeUserConfig ParseConfigDocument(const toml::value& document) {
         FindConfigValue<bool>(document, "video", "metalfx_spatial_upscaling");
     config.skipUnreadyPipelines = FindConfigValue<bool>(document, "video", "skip_unready_pipelines");
     config.vsync = FindConfigValue<bool>(document, "video", "vsync");
+    config.pauseOnFocusLost = FindConfigValue<bool>(document, "video", "pause_on_focus_lost");
     config.gxWorker = FindConfigValue<bool>(document, "video", "gx_worker");
     config.disableCopyFilter = FindConfigValue<bool>(document, "video", "disable_copy_filter");
     config.showFps = FindConfigValue<bool>(document, "video", "show_fps");
@@ -673,6 +677,11 @@ inline bool SetSkipUnreadyPipelines(bool value) {
 inline bool SetVsync(bool value) {
     Mutable().vsync = value;
     return WriteSetting("video", "vsync", value ? "true" : "false");
+}
+
+inline bool SetPauseOnFocusLost(bool value) {
+    Mutable().pauseOnFocusLost = value;
+    return WriteSetting("video", "pause_on_focus_lost", value ? "true" : "false");
 }
 
 inline bool SetDisableCopyFilter(bool value) {
@@ -973,6 +982,10 @@ inline bool SkipUnreadyPipelines(bool fallback = true) {
 
 inline bool Vsync(bool fallback = false) {
     return Get().vsync.value_or(fallback);
+}
+
+inline bool PauseOnFocusLost(bool fallback = false) {
+    return Get().pauseOnFocusLost.value_or(fallback);
 }
 
 inline bool DisableCopyFilter(bool fallback = true) {
