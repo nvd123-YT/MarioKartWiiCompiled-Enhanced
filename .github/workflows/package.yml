@@ -256,7 +256,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: WiiCompiled-Setup-macos-universal
-          path: Launcher/dist/WiiCompiled-Setup.pkg
+          path: Launcher/dist/WiiCompiled-Setup.dmg
           if-no-files-found: error
           archive: false
 
@@ -274,7 +274,7 @@ jobs:
   release:
     name: Publish GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [linux-appimage, windows-installer, macos-setup-package, recompilation]
+    needs: [linux-appimage, windows-installer, macos-setup-dmg, recompilation]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -319,7 +319,7 @@ jobs:
           set -euo pipefail
           ls -lR artifacts
           assets=()
-          for name in WiiCompiled-Setup.exe WiiCompiled-Setup-x86_64.AppImage WiiCompiled-Setup-aarch64.AppImage WiiCompiled-Setup.pkg WiiCompiled-Setup-macos.run; do
+          for name in WiiCompiled-Setup.exe WiiCompiled-Setup-x86_64.AppImage WiiCompiled-Setup-aarch64.AppImage WiiCompiled-Setup.dmg WiiCompiled-Setup-macos.run; do
             found="$(find artifacts -type f -name "$name" | head -n 1)"
             [ -n "$found" ] && [ -s "$found" ] || { echo "::error::missing release asset $name"; exit 1; }
             assets+=("$found")
