@@ -14,7 +14,7 @@ Usage: build-setup-dmg.command --nodtool-arm64 PATH --nodtool-x86_64 PATH --tran
 Creates a game-code-free WiiCompiled Setup.dmg containing a drag-and-drop app bundle. The supplied tools must be
 maintainer-verified, redistributable macOS artifacts for both arm64 and
 x86_64. The app selects native tools for its host while the game is
-compiled locally for that host architecture. CMake must be universal2. The
+compiled locally for that host architecture. CMake must be universal2.
 The app bundle is ad-hoc signed. A Developer ID Application identity and
 notarization are required for Gatekeeper trust without a first-launch override.
 
