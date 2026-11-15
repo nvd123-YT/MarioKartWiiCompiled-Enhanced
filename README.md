@@ -30,6 +30,8 @@ WiiCompiled translates the game's PowerPC code into native code before launch. T
 - On **Linux**, it uses MPRIS-compatible media players.
 - On **macOS 14.2 or later**, it detects active audio output from other applications while excluding WiiCompiled's own output. An application that keeps an audio stream open while silent may still cause the game's music to remain muted.
 
+The F10 Audio menu also includes separate **Master, Music, Sound Effects, UI, and Voices** volume controls, a configurable keyboard shortcut for instant mute, and an optional audio-mixing worker-thread switch for troubleshooting.
+
 ### In-game settings
 
 Press **F10** while the game window is focused to open the settings bar. It includes:
@@ -52,6 +54,7 @@ Changes are written to `Config.toml` immediately and restored the next time the 
 - **Vibration control.** Disable force feedback across all controller ports with the in-game toggle.
 - **Official Wii U / Switch GameCube adapter (WUP-028).** The adapter is supported. On Windows, install the WinUSB driver for it once using [Zadig](https://zadig.akeo.ie/), as with Dolphin.
 - **Real Wii Remotes over Bluetooth.** Pair a Wii Remote with Windows through Settings → Bluetooth → Add device, then press **1+2** or **SYNC**. Leave the PIN field empty when prompted.
+- **Shake to trick on motion-enabled gamepads.** In F10 → Controller settings, enable **Shake to trick** for a player using a controller with an exposed motion sensor. Flick the controller to trigger directional tricks off ramps or wheelies on bikes; the D-pad remains available. Adjust sensitivity and use the on-screen meter to test the motion threshold. Some Steam Input layouts hide motion sensors; disable Steam Input for the game if the sensor is unavailable.
 
 Known Wii Remote limitations:
 
@@ -60,6 +63,13 @@ Known Wii Remote limitations:
 - Only the Wii Remote's own accelerometer is calibrated. The Nunchuk currently uses SDL's fixed zero point.
 - Classic Controller L/R triggers are reported as digital inputs (full pull on click); SDL does not expose their analog travel through this path.
 - Disable Wii Remote support in the settings bar when using a Mayflash DolphinBar that already presents the remote as a regular gamepad.
+
+### More built-in features
+
+- **Dolphin-style custom texture replacements.** Enable `texture_replacements = true` under `[video]` in `Config.toml`, then place matching `.dds` or `.png` replacements in the `texture_replacements` folder inside WiiCompiled's user-data directory. Aurora indexes this folder when the game starts, so restart after adding or changing textures.
+- **Texture dumping for pack creation.** Set `texture_dumps = true` under `[video]` as well as enabling texture replacements. Unmatched textures are written to `Cache/texture_dumps` with replacement-compatible filenames, giving you a starting point for creating your own pack. Dumping is only active when texture replacements are enabled.
+- **Portable user-data mode.** Put an empty file named `portable.txt` in a writable folder above the game executable within the install tree. WiiCompiled then stores `Config.toml`, NAND data, cache, and logs in a `UserData` folder beside that marker instead of using the normal per-user application-data location. This is useful when keeping an installation and its user data together on an external drive.
+- **Friend-code clipboard paste for Retro Rewind.** On the Register Friend page, enter a code with the keyboard or paste it with **Ctrl+V** (Windows/Linux) or **Command+V** (macOS). The input accepts up to 12 digits and ignores spaces, hyphens, and other non-digit characters.
 
 ---
 
