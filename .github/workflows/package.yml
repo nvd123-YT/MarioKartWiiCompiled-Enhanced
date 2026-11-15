@@ -274,6 +274,12 @@ jobs:
           test "$(readlink "$mount/Applications")" = /Applications
           codesign --verify --deep --strict "$app"
           resources="$app/Contents/Resources"
+          launcher_script="$resources/launch-setup.applescript"
+          test -f "$launcher_script"
+          grep -Fq 'com.googlecode.iterm2' "$launcher_script"
+          grep -Fq 'com.apple.Terminal' "$launcher_script"
+          grep -Fq 'choose from list availableTerminals' "$launcher_script"
+          /usr/bin/osacompile -o "$RUNNER_TEMP/wiicompiled-setup-launcher.scpt" "$launcher_script"
           for arch in arm64 x86_64; do
             for tool in nodtool Translator.Cli ninja; do
               lipo "$resources/tools/$arch/$tool" -verify_arch "$arch"
