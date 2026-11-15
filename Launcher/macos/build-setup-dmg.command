@@ -3,31 +3,29 @@
 # translated executable, extracted DATA tree, disc image, or Retro Rewind data.
 set -euo pipefail
 
-fail() { printf 'build-setup-pkg.command: error: %s\n' "$*" >&2; exit 1; }
+fail() { printf 'build-setup-dmg.command: error: %s\n' "$*" >&2; exit 1; }
 # Release payloads must not inherit Finder metadata, resource forks, or a
 # downloaded-file quarantine bit from a maintainer's working volume.
 copy_clean() { DITTONORSRC=1 ditto --norsrc --noqtn "$@"; }
 usage() {
     cat <<'EOF'
-Usage: build-setup-pkg.command --nodtool-arm64 PATH --nodtool-x86_64 PATH --translator-arm64 PATH --translator-x86_64 PATH --setup-arm64 PATH --setup-x86_64 PATH --cmake-root DIR --ninja-arm64 PATH --ninja-x86_64 PATH --output PKG [options]
+Usage: build-setup-dmg.command --nodtool-arm64 PATH --nodtool-x86_64 PATH --translator-arm64 PATH --translator-x86_64 PATH --setup-arm64 PATH --setup-x86_64 PATH --cmake-root DIR --ninja-arm64 PATH --ninja-x86_64 PATH --output DMG [options]
 
-Creates a game-code-free WiiCompiled Setup.pkg. The supplied tools must be
+Creates a game-code-free WiiCompiled Setup.dmg containing a drag-and-drop app bundle. The supplied tools must be
 maintainer-verified, redistributable macOS artifacts for both arm64 and
-x86_64. The setup package selects native tools for its host while the game is
-compiled locally for that host architecture. CMake must be universal2. The
-resulting pkg is unsigned unless
---installer-identity is supplied; releases should sign and notarize it with a
-Developer ID Installer certificate.
+x86_64. The app selects native tools for its host while the game is
+compiled locally for that host architecture. CMake must be universal2.
+The app bundle is ad-hoc signed. A Developer ID Application identity and
+notarization are required for Gatekeeper trust without a first-launch override.
 
   --workspace DIR             Repository root (default: script's grandparent)
   --version VERSION           Bundle/package version (default: project version, or 0.1.0)
-  --installer-identity NAME   Developer ID Installer identity for productbuild
   --run-output FILE           Also write the same bundle as a self-extracting .run for frontends
 EOF
 }
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-workspace=$(cd "$script_dir/../.." && pwd); nodtool_arm64=""; nodtool_x86_64=""; translator_arm64=""; translator_x86_64=""; setup_arm64=""; setup_x86_64=""; cmake_root=""; ninja_arm64=""; ninja_x86_64=""; output=""; version=0.1.0; identity=""; run_output=""
+workspace=$(cd "$script_dir/../.." && pwd); nodtool_arm64=""; nodtool_x86_64=""; translator_arm64=""; translator_x86_64=""; setup_arm64=""; setup_x86_64=""; cmake_root=""; ninja_arm64=""; ninja_x86_64=""; output=""; version=0.1.0; run_output=""
 version_supplied=false
 while (($#)); do
     case "$1" in
@@ -43,7 +41,6 @@ while (($#)); do
         --ninja-x86_64) ninja_x86_64=${2:-}; shift 2 ;;
         --output) output=${2:-}; shift 2 ;;
         --version) version=${2:-}; version_supplied=true; shift 2 ;;
-        --installer-identity) identity=${2:-}; shift 2 ;;
         --run-output) run_output=${2:-}; shift 2 ;;
         -h|--help) usage; exit 0 ;;
         *) fail "unknown option: $1" ;;
@@ -62,7 +59,7 @@ fi
 [[ "$version" =~ ^[0-9]+(\.[0-9]+){0,2}$ ]] || fail '--version must contain one to three period-separated integers'
 IFS=. read -r version_major version_minor version_patch <<< "$version"
 short_version="$version_major.${version_minor:-0}.${version_patch:-0}"
-for tool in pkgbuild productbuild ditto codesign lipo; do command -v "$tool" >/dev/null || fail "required macOS tool unavailable: $tool"; done
+for tool in hdiutil ditto codesign lipo; do command -v "$tool" >/dev/null || fail "required macOS tool unavailable: $tool"; done
 for tool_path in "$nodtool_arm64" "$nodtool_x86_64" "$translator_arm64" "$translator_x86_64" "$setup_arm64" "$setup_x86_64" "$ninja_arm64" "$ninja_x86_64"; do [[ -x "$tool_path" ]] || fail 'each architecture-specific tool must name an executable'; done
 [[ -x "$cmake_root/bin/cmake" ]] || fail '--cmake-root must contain bin/cmake'
 require_arch() {
@@ -90,7 +87,7 @@ run_for_arch() {
     else
         # Intel hosts cannot execute arm64 binaries. The slice remains checked
         # above; CI or an Apple Silicon maintainer must execute that tool set.
-        printf 'build-setup-pkg.command: warning: unable to execute %s on %s; architecture slice was verified, but run it in %s CI before release\n' \
+        printf 'build-setup-dmg.command: warning: unable to execute %s on %s; architecture slice was verified, but run it in %s CI before release\n' \
             "$label" "$host_arch" "$arch" >&2
     fi
 }
@@ -107,9 +104,9 @@ for arch in arm64 x86_64; do
 done
 run_for_arch "$host_arch" '--cmake-root/bin/cmake' "$cmake_root/bin/cmake" --version
 workspace=$(cd "$workspace" && pwd); output=$(cd "$(dirname "$output")" && pwd)/$(basename "$output")
-stage=$(mktemp -d "${TMPDIR:-/tmp}/wiicompiled-pkg.XXXXXX")
+stage=$(mktemp -d "${TMPDIR:-/tmp}/wiicompiled-dmg.XXXXXX")
 trap 'rm -rf "$stage"' EXIT
-app="$stage/root/Applications/WiiCompiled Setup.app"
+app="$stage/WiiCompiled Setup.app"
 resources="$app/Contents/Resources"
 mkdir -p "$app/Contents/MacOS" "$resources/tools"
 cat > "$app/Contents/Info.plist" <<EOF
@@ -127,28 +124,13 @@ cat > "$app/Contents/Info.plist" <<EOF
 EOF
 cat > "$app/Contents/MacOS/WiiCompiledSetup" <<'EOF'
 #!/usr/bin/env bash
+set -euo pipefail
 resources="$(cd "$(dirname "$0")/../Resources" && pwd)"
-
-# Finder launches an app with no terminal attached. The setup work deliberately
-# writes human-readable build progress to stdout, so run its .command entry
-# point in Terminal instead of discarding that output behind an inert app icon.
-exec /usr/bin/osascript - "$resources/setup.command" "$@" <<'APPLESCRIPT'
-on run argv
-    set commandLine to quoted form of (item 1 of argv)
-    if (count of argv) > 1 then
-        repeat with argumentIndex from 2 to (count of argv)
-            set commandLine to commandLine & " " & quoted form of (item argumentIndex of argv)
-        end repeat
-    end if
-    tell application "Terminal"
-        activate
-        do script commandLine
-    end tell
-end run
-APPLESCRIPT
+exec /usr/bin/osascript "$resources/launch-setup.applescript" "$resources/setup.command" "$@"
 EOF
 chmod +x "$app/Contents/MacOS/WiiCompiledSetup"
 copy_clean "$script_dir/setup.command" "$resources/setup.command"; chmod +x "$resources/setup.command"
+copy_clean "$script_dir/launch-setup.applescript" "$resources/launch-setup.applescript"
 copy_clean "$script_dir/sync-workspace.command" "$resources/sync-workspace.command"; chmod +x "$resources/sync-workspace.command"
 # Copy only the build inputs. This deliberately avoids a maintainer's ignored
 # output directories, local disc extraction, and developer-only packaging.
@@ -190,8 +172,8 @@ copy_clean "$workspace/THIRD-PARTY-NOTICES.md" "$resources/THIRD-PARTY-NOTICES.m
 codesign --force --deep --sign - "$app"
 if [[ -n "$run_output" ]]; then
     # The same signed Resources plus the setup CLI and its wiicompiled-setup entry point, behind
-    # setup-run-header.sh, so Wheel Wizard can download and run it without installing the pkg. Only
-    # the .run carries the CLI; the pkg's own setup.command never uses it.
+    # setup-run-header.sh, so Wheel Wizard can download and run it independently of the DMG app.
+    # Only the .run carries the setup CLI; the app invokes setup.command in Terminal.
     run_output=$(cd "$(dirname "$run_output")" && pwd)/$(basename "$run_output")
     run_extra="$stage/run-extra"
     mkdir -p "$run_extra/tools/arm64" "$run_extra/tools/x86_64"
@@ -206,7 +188,24 @@ if [[ -n "$run_output" ]]; then
     ditto "$stage/setup.run" "$run_output"
     printf 'Created self-extracting setup: %s\n' "$run_output"
 fi
-pkg="$stage/WiiCompiled-Setup-unsigned.pkg"
-DITTONORSRC=1 COPYFILE_DISABLE=1 pkgbuild --root "$stage/root" --identifier org.wiicompiled.setup --version "$version" --install-location / "$pkg"
-if [[ -n "$identity" ]]; then productbuild --sign "$identity" --package "$pkg" "$output"; else ditto "$pkg" "$output"; fi
-printf 'Created game-code-free package: %s\n' "$output"
+image_root="$stage/image"
+mkdir -p "$image_root"
+copy_clean "$app" "$image_root/WiiCompiled Setup.app"
+ln -s /Applications "$image_root/Applications"
+cat > "$image_root/README.txt" <<EOF
+WiiCompiled Setup $version
+
+1. Open WiiCompiled Setup.app (or drag it to Applications first).
+2. Choose iTerm2 or Terminal for visible build progress (iTerm2 is preselected
+   when both are installed).
+3. Choose your own clean Mario Kart Wii disc image when prompted.
+4. The setup builds locally and installs the resulting app under ~/Applications
+   by default; administrator access is not needed for that user-level install.
+
+The disk image contains setup tools and source code only. It does not contain
+Nintendo game data or a prebuilt game.
+EOF
+DITTONORSRC=1 COPYFILE_DISABLE=1 hdiutil create -quiet -volname "WiiCompiled Setup" \
+    -srcfolder "$image_root" -ov -format UDZO "$output"
+hdiutil verify "$output" >/dev/null || fail 'the generated disk image failed verification'
+printf 'Created drag-and-drop macOS disk image: %s\n' "$output"

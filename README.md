@@ -111,24 +111,28 @@ launching. The backend itself is deliberately command-line only, Wheel Wizard is
 
 ### macOS
 
-Download `WiiCompiled-Setup.pkg` from this repository's Releases page and open it. The universal
-package selects the appropriate bundled tools for the host architecture, supporting both Apple Silicon (`arm64`)
-and Intel (`x86_64`) Macs. It installs **WiiCompiled Setup** in Applications; open that app, choose
-your clean PAL `RMCP01`, NTSC-U `RMCE01`, or NTSC-J `RMCJ01` disc image, and select either the base game or Retro Rewind. For Retro Rewind, choose the `RetroRewind6` folder
-or its parent folder.
+Download `WiiCompiled-Setup.dmg` from this repository's Releases page and open it in Finder. Open
+`WiiCompiled Setup.app` directly from the mounted image, or drag it to Applications first. The
+universal setup includes native tools for both Apple Silicon (`arm64`) and Intel (`x86_64`) Macs.
 
-Setup verifies and extracts the image locally, then translates and compiles the native app on your
-Mac. On a first run it may ask macOS to install Xcode Command Line Tools; complete Apple's installer,
-then open Setup again. When the build completes, Setup asks for administrator approval once to install
-`WiiCompiled.app` (and, if selected, `RetroRewind.app`) in `/Applications`.
+Choose your clean PAL `RMCP01`, NTSC-U `RMCE01`, or NTSC-J `RMCJ01` disc image, then select either
+the base game or Retro Rewind. For Retro Rewind, choose the `RetroRewind6` folder or its parent folder.
+Setup verifies and extracts the image locally, then translates and compiles the native app on your Mac.
 
-Setup opens Terminal while it works, so the extraction and build progress—and any error that needs
-reporting—remain visible.
+The default install location is your personal `~/Applications` folder, so installing the game does not
+require administrator access. On a first run, macOS may ask to install Xcode Command Line Tools; complete
+Apple's installer, then open Setup again.
+
+Setup asks whether to use iTerm2 or Terminal when both are installed; iTerm2 is preselected.
+This is useful on managed Macs where Terminal.app is restricted but iTerm2 is allowed. The chosen
+terminal shows extraction and build progress and any error that needs reporting. The current automated
+build is ad-hoc signed rather than Developer ID notarized; on a Mac that blocks it, Control-click
+`WiiCompiled Setup.app`, choose **Open**, and confirm the prompt. Managed devices may enforce stricter
+app policies that cannot be overridden by this step.
 
 > [!CAUTION]
-> Only take builds from this repository's
-> [Releases](https://github.com/patchzyy/Wiicompiled/releases) page. If someone's sharing an
-> installer through Discord or some random download site, don't touch it!!
+> Only use builds from this repository's [Releases](https://github.com/nvd123-YT/MarioKartWiiCompiled-Enhanced/releases)
+> page. Avoid installers shared through Discord or third-party download sites.
 
 ## A note on related projects
 
