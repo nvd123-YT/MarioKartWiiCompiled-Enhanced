@@ -9,7 +9,7 @@ name: Package installers
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
   pull_request:
     paths:
       - ".github/workflows/package.yml"
@@ -29,13 +29,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate-release-version:
+    name: Validate release tag against product version
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: Require tag to equal v plus Directory.Build.props Version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 -c 'import xml.etree.ElementTree as ET; root = ET.parse("Launcher/Directory.Build.props").getroot(); value = root.findtext("./PropertyGroup/Version"); assert value and value.strip(), "Version is missing"; print(value.strip())')"
+          expected_tag="v${version}"
+          actual_tag="$GITHUB_REF_NAME"
+          if [[ "$actual_tag" != "$expected_tag" ]]; then
+            echo "::error title=Release tag/version mismatch::Tag '$actual_tag' must be exactly '$expected_tag' because Launcher/Directory.Build.props declares Version=$version."
+            exit 1
+          fi
+          echo "Validated release tag $actual_tag against Launcher/Directory.Build.props Version=$version."
+
   recompilation:
-    if: github.event_name != 'pull_request'
+    needs: validate-release-version
+    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') && github.event_name != 'pull_request' }}
     name: Recompilation test
     uses: ./.github/workflows/recomp-test.yml
 
   linux-appimage:
-    if: github.event_name != 'pull_request'
+    needs: validate-release-version
+    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') && github.event_name != 'pull_request' }}
     name: Linux (AppImage, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -80,7 +105,8 @@ jobs:
           archive: false
 
   windows-installer:
-    if: github.event_name != 'pull_request'
+    needs: validate-release-version
+    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') && github.event_name != 'pull_request' }}
     name: Windows (installer exe)
     runs-on: windows-latest
     steps:
@@ -105,6 +131,8 @@ jobs:
           archive: false
 
   macos-setup-dmg:
+    needs: validate-release-version
+    if: ${{ always() && (needs.validate-release-version.result == 'success' || needs.validate-release-version.result == 'skipped') }}
     name: macOS (universal drag-and-drop DMG)
     runs-on: macos-15
     steps:
@@ -274,7 +302,7 @@ jobs:
   release:
     name: Publish GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [linux-appimage, windows-installer, macos-setup-dmg, recompilation]
+    needs: [validate-release-version, linux-appimage, windows-installer, macos-setup-dmg, recompilation]
     runs-on: ubuntu-latest
     permissions:
       contents: write
