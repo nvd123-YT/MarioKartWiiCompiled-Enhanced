@@ -8,6 +8,8 @@ name: Package installers
 # which is proprietary and not present in this repository or in CI.
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   pull_request:
