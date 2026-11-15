@@ -1,129 +1,148 @@
-# Mario Kart WiiCompiled
-original project by Patchzzy, this fork by nvd123_YT
+# Mario Kart WiiCompiled — Enhanced Fork
 
+A native PC port of **Mario Kart Wii**, built through static recompilation.
 
-A native PC port of Mario Kart Wii, made with static recompilation.
+**Original project credit:** WiiCompiled was created by **[Patchzzy (@patchzyy)](https://github.com/patchzyy)**. This repository is an independently maintained fork of [Patchzzy's original WiiCompiled project](https://github.com/patchzyy/Wiicompiled), maintained by [nvd123-YT](https://github.com/nvd123-YT). The original project and its author deserve credit for the foundation this fork builds on. Fork-specific changes are not official upstream releases.
 
-There's no emulator in the loop, no interpreter, no JIT, no PowerPC
-anywhere at runtime.
+WiiCompiled translates the game's PowerPC code into native code before launch. There is no Wii emulator, interpreter, or JIT running during gameplay, and no PowerPC CPU emulation in the runtime.
 
 > [!IMPORTANT]
-> There is no Nintendo code, no assets and no game data anywhere in this project or its releases.
-> You need your own legally dumped copy of the PAL, NTSC-U, or NTSC-J version of the game. Setup only ships the
-> toolchain, the translation runs on your machine against your disc image, and nothing ever gets
-> uploaded.
+> **You must provide your own legally dumped copy of Mario Kart Wii.** This repository and its releases do not include Nintendo game code, game assets, or a game image. The setup tools run the translation and compilation locally against your disc image. Your game data is not uploaded.
 
 ---
 
-## What it does
+## Features
 
-**Unlocked framerate with interpolation.** 
-The original game is hard-locked to 60 fps. The runtime can generate interpolated frames in between, so on a
-120/144 Hz monitor things genuinely look smoother.
+### Graphics and display
 
-> [!WARNING]
-> Interpolation is experimental right now and will show artifacts in specific scenarios.
+- **Unlocked presentation with frame interpolation.** Mario Kart Wii normally targets 60 FPS. WiiCompiled can generate interpolated frames between the game's original frames, making motion look smoother on 120 Hz and 144 Hz displays.
+  > [!WARNING]
+  > Frame interpolation is experimental and can produce visual artifacts in certain situations.
+- **Resizable aspect ratio.** Resize the game window to different shapes and sizes; the camera adjusts dynamically.
+- **Native rendering through [Aurora](https://github.com/encounter/aurora).** The graphics layer uses Aurora, a source-level GameCube and Wii compatibility layer.
+- **Higher internal resolution.** Render the game at multiples of the original console resolution.
+- **MetalFX spatial upscaling.** The in-game settings bar exposes MetalFX spatial upscaling on supported macOS GPUs.
 
-**Any aspect ratio you want.** 
-Drag the window bigger, wider, whatever, the camera adjusts
-live.
+### Audio
 
-**Native rendering via aurora.** 
-The graphics layer is built on
-[aurora](https://github.com/encounter/aurora). Aurora is a source-level GameCube & Wii compatibility layer.
+- **Automatic music ducking.** When another application starts playing audio—such as Spotify or a YouTube video—WiiCompiled can automatically lower or mute the game's music until the other audio stops. This can be disabled.
+- On **Windows**, music ducking uses system media controls.
+- On **Linux**, it uses MPRIS-compatible media players.
+- On **macOS 14.2 or later**, it detects active audio output from other applications while excluding WiiCompiled's own output. An application that keeps an audio stream open while silent may still cause the game's music to remain muted.
 
-**High internal resolution.** 
-Play at several times the console's resolution.
+### In-game settings
 
-**Music ducking.** 
-Start playing something else, Spotify, a YouTube video, and
-the game automatically mutes its own music until the other audio stops. Optional, if you'd
-rather it didn't. Windows uses system media controls and Linux uses MPRIS players.
-On macOS 14.2 or later, this detects other apps with active audio output and excludes
-the game's own audio. Apps that keep an output stream running silently can keep
-game music muted even when nothing is audible.
+Press **F10** while the game window is focused to open the settings bar. It includes:
 
-**An in-game settings bar.** 
-Press **F10** while the game window has focus:
-- Internal resolution
+- Internal rendering resolution
 - FPS counter
 - MetalFX spatial upscaling on supported macOS GPUs
-- Controller assignment for all four ports
-- Full per-controller button mapping, including the bumpers
-- Dolphin-syntax input expressions and GCPadNew.ini import
+- Assignment of controllers to all four GameCube controller ports
+- Per-controller button mapping, including bumpers
+- Dolphin-syntax input expressions and direct `GCPadNew.ini` import
 - Controller vibration on/off
-- Volume, instant mute, and the music ducking toggle
+- Volume controls, instant mute, and the music-ducking toggle
 
-Everything you change is saved to `Config.toml` on the spot and restored next launch.
+Changes are written to `Config.toml` immediately and restored the next time the game starts.
 
-**Dolphin-compatible input expressions.** 
-Each GameCube control can carry an expression in Dolphin's input syntax, with the same operators
-and the same functions.
-A Dolphin `GCPadNew.ini` can be imported directly from the F10 bar.
+### Controller support
 
-**Vibration toggle.** 
-Force feedback can be turned off for every port at once.
-The official Wii U / Switch GameCube adapter (WUP-028) works too; as with Dolphin, on Windows the
-adapter must be switched to the WinUSB driver once (Zadig).
+- **Dolphin-compatible input expressions.** GameCube controls can use expressions written in Dolphin's input syntax, including its operators and functions. Import a Dolphin `GCPadNew.ini` directly from the F10 settings bar.
+- **Four controller ports.** Assign controllers and configure each port independently.
+- **Vibration control.** Disable force feedback across all controller ports with the in-game toggle.
+- **Official Wii U / Switch GameCube adapter (WUP-028).** The adapter is supported. On Windows, install the WinUSB driver for it once using [Zadig](https://zadig.akeo.ie/), as with Dolphin.
+- **Real Wii Remotes over Bluetooth.** Pair a Wii Remote with Windows through Settings → Bluetooth → Add device, then press **1+2** or **SYNC**. Leave the PIN field empty when prompted.
 
-**Real Wii Remotes over Bluetooth.**
-Pair a Wii Remote with Windows (Settings > Bluetooth > Add device, press 1+2 or SYNC, leave the
-PIN empty)
+Known Wii Remote limitations:
 
-Known limitations of the Wii Remote path:
-- No IR pointer yet: menus are navigated with the D-pad and A (the game treats the remote as
-  pointing away from the screen).
-- Battery level is not reported to the game and the remote's speaker is not implemented.
-- Only the Wii Remote's own accelerometer is calibrated; the Nunchuk's uses SDL's fixed zero point.
-- The Classic Controller's L/R triggers reach the game as digital (full pull on click): SDL does not
-  expose their analog travel.
-- Turn the Wii Remote support off in that menu if you use a Mayflash DolphinBar, which already
-  presents the remote as a regular gamepad.
+- The IR pointer is not implemented yet. Navigate menus with the D-pad and A; the game treats the remote as pointing away from the screen.
+- Battery level is not reported to the game, and the Wii Remote speaker is not implemented.
+- Only the Wii Remote's own accelerometer is calibrated. The Nunchuk currently uses SDL's fixed zero point.
+- Classic Controller L/R triggers are reported as digital inputs (full pull on click); SDL does not expose their analog travel through this path.
+- Disable Wii Remote support in the settings bar when using a Mayflash DolphinBar that already presents the remote as a regular gamepad.
+
+---
+
+## Download and installation
+
+Download the setup package for your operating system from the [GitHub Releases page](https://github.com/nvd123-YT/MarioKartWiiCompiled-Enhanced/releases).
+
+| Platform | Release package |
+| --- | --- |
+| Windows 10/11, 64-bit | `WiiCompiled-Setup.exe` |
+| macOS, universal Apple Silicon and Intel | `WiiCompiled-Setup.dmg` |
+| macOS, self-extracting alternative | `WiiCompiled-Setup-macos.run` |
+| Linux, x86-64 | `WiiCompiled-Setup-x86_64.AppImage` |
+| Linux, ARM64 | `WiiCompiled-Setup-aarch64.AppImage` |
+
+The setup package contains the tools needed to prepare a native build; it is **not** a precompiled copy of Mario Kart Wii. During setup, choose your own clean disc image. The image is checked and processed on your computer, then the game is translated and compiled locally. Nothing is uploaded.
+
+On macOS, open the DMG and use the included setup app. If Xcode Command Line Tools are missing, macOS may ask you to install them; complete Apple's installer and reopen setup.
+
+WiiCompiled also has integration with [Wheel Wizard](https://github.com/TeamWheelWizard/WheelWizard), which can manage setup, updates, and launching. Wheel Wizard is a separate project with its own releases and documentation.
+
+---
 
 ## Requirements
 
-- Windows 10 or 11, 64-bit
-- GPU: GTX 1650 / RX 6400 / Arc A310 or higher
-- CPU: Intel Core i5-8400 / AMD Ryzen 5 2600 (4c/6c, ~3.5GHz+) or higher
-- About 20 GB of free disk space during installation (Final game size ~5 GB)
-- macOS 12 (Monterey) or later on Apple Silicon (`arm64`) or Intel (`x86_64-v3`); pre-Haswell Intel CPUs are unsupported
-- On macOS, a Metal-capable GPU and Apple Xcode Command Line Tools (Setup opens Apple's installer when they are missing)
-- A clean, unmodified **PAL `RMCP01`**, **NTSC-U `RMCE01`**, or **NTSC-J `RMCJ01`** disc image of Mario Kart Wii, dumped by you. ISO, GCM,
-  GCZ, CISO, WBFS, WIA and RVZ are accepted.
+### Windows
+
+- Windows 10 or Windows 11, 64-bit
+- GPU: NVIDIA GTX 1650, AMD RX 6400, Intel Arc A310, or better
+- CPU: Intel Core i5-8400, AMD Ryzen 5 2600 (or a comparable 4-core / 6-thread CPU at approximately 3.5 GHz), or better
+- Approximately 20 GB of free space during installation; the finished game installation is approximately 5 GB
+
+### macOS
+
+- macOS 12 (Monterey) or later
+- Apple Silicon (`arm64`) or Intel (`x86_64-v3`); pre-Haswell Intel processors are not supported
+- A Metal-capable GPU
+- Apple's Xcode Command Line Tools. Setup can open Apple's installer when they are missing.
+
+The macOS music-ducking detection described above requires macOS 14.2 or later.
 
 > [!NOTE]
-> GPU/CPU minimums are set by driver support and D3D12/Vulkan feature requirements, not by the game's actual demands.
+> The listed Windows CPU and GPU minimums are driven largely by graphics-driver support and D3D12/Vulkan feature requirements, not by the original game's hardware demands.
 
-Only the clean PAL, NTSC-U, and NTSC-J revisions will work. Anything else (NTSC-K, patched executables) is rejected outright.
+### Required game image
+
+Only clean, unmodified copies of these revisions are supported:
+
+- **PAL:** `RMCP01`
+- **NTSC-U:** `RMCE01`
+- **NTSC-J:** `RMCJ01`
+
+Accepted image formats are ISO, GCM, GCZ, CISO, WBFS, WIA, and RVZ.
+
+Other revisions—including NTSC-K (`RMCK01`)—and modified executables are rejected. Translating a different revision against the wrong manifest can produce subtle and difficult-to-diagnose errors.
 
 > [!NOTE]
-> Nobody here will tell you where to get the game. Dumping your own disc is on you, and links to
-> game files won't be provided or tolerated.
+> You are responsible for dumping your own game disc. This project does not provide game files or links to them.
 
-
-
-## A note on related projects
-
-WiiCompiled, Wheel Wizard, Retro rewind and other related projects are developed
-**independently** and each has its **own** contribution rules and all have their own
-rules. What applies here does not automatically apply there,
-and vice versa. Check each project's own CONTRIBUTING and README files.
+---
 
 ## Retro Rewind
 
-[Retro Rewind](https://wiki.tockdom.com/wiki/Retro_Rewind), ZPL's Mario Kart Wii mod distribution,
-can be built as its **own static profile**: instead of applying `Code.pul` as runtime patches,
-the Kamek/Pulsar code is statically translated together with the base game into a separate native
-executable.
+[Retro Rewind](https://wiki.tockdom.com/wiki/Retro_Rewind), the Mario Kart Wii mod distribution by ZPL and its team, can be built as its **own static profile**.
 
-Wheel Wizard drives this too.
+Rather than applying `Code.pul` as runtime patches, the Kamek/Pulsar code is translated together with the base game into a separate native executable. The project also includes build-guide support for the optional Retro-WFC payload used for Retro Rewind online multiplayer.
+
+[Wheel Wizard](https://github.com/TeamWheelWizard/WheelWizard) can drive this workflow as well. Retro Rewind, Wheel Wizard, and WiiCompiled are independently developed projects; each has its own maintainers, contribution rules, and support channels. Check the relevant project's own README and contribution guidelines.
+
+---
 
 ## Building from source
 
-Owning the game is still required even if you compile everything yourself.
+You still need to own a supported game copy when building from source.
 
-You'll need: .NET 8 SDK, CMake, Ninja, and LLVM/Clang (the shipped build uses LLVM-MinGW targeting
-`x86-64-v3`).
+### Prerequisites
+
+- .NET 8 SDK
+- CMake
+- Ninja
+- LLVM / Clang
+
+The shipped Windows build uses LLVM-MinGW targeting `x86-64-v3`.
 
 Build the translator:
 
@@ -131,72 +150,87 @@ Build the translator:
 dotnet build translator/Translator.sln -c Release
 ```
 
-The default test suite needs no binaries and no host C++ compiler, so you can hack on the
-translator without any game data around.
+The default translator test suite does not require game binaries or a host C++ compiler, so translator development can be done without game data.
 
-For everything beyond that, feeding in your own `main.dol`/`StaticR.rel`, running the
-translation, generating the manifest and build graph, and compiling, see [`translator/README.md`](translator/README.md).
+For the full workflow—providing your own `main.dol` and `StaticR.rel`, translating the game, generating the manifest and build graph, and compiling the native runtime—see the [translator documentation](translator/README.md).
 
-For a step-by-step guide on compiling both WiiCompiled and Retro Rewind from source on macOS (Apple Silicon), see the [macOS Build Guide](docs/building-macos.md).
+For a step-by-step guide to building WiiCompiled and Retro Rewind from source on Apple Silicon macOS, see the [macOS build guide](docs/building-macos.md).
+
+The translator handles DOL and REL files generically. A translation alone does not make every game playable: a compatible runtime must also implement the systems that game uses, including graphics, audio, and input. See `projects/examples/generic-dol.yml` for the generic DOL example.
+
+---
 
 ## FAQ
 
-**Is this an emulator?**
-No. Everything is compiled to native code before you ever press play. At runtime there's nothing
-emulating a Wii CPU or GPU.
+### Is WiiCompiled an emulator?
 
-**Do you provide the game?**
-No. Don't ask. Nothing in this repo or any release contains Nintendo code or assets.
+No. The game's code is statically translated and compiled into native code before you play. The runtime does not emulate a Wii CPU or GPU.
 
-**Why does setup take so long?**
-Because we **don't** ship the translated binary, most other recomp projects do, but we
-don't want to risk it right now, setup has to run a static recompiler over the whole game
-and then throw a C++ compiler at the result. It's a **one-time cost** on your machine.
+### Does this project include Mario Kart Wii?
 
-**Which game version works?**
-Clean PAL `RMCP01`, NTSC-U `RMCE01`, and NTSC-J `RMCJ01`. NTSC-K `RMCK01` and modified executables are **rejected**. Translating
-them against the wrong manifest would give you a subtly broken game that's miserable to debug for us.
+No. The repository and releases do not distribute the game or its Nintendo assets. Supply your own supported disc image.
 
-**Can I recompile other GameCube/Wii games with it?**
-The translator itself handles DOLs and RELs generically, see
-`projects/examples/generic-dol.yml`. The catch is that a *playable* port also needs a runtime:
-audio, input, GX, everything the game touches.
+### Why does setup take so long?
 
-**The game crashed / stopped with an error.**
-Errors are deliberately loud instead of quietly swallowed. Send a report along with the run log
-from `%LOCALAPPDATA%\WiiCompiled\Logs`.
+The translated game executable is not included in the installer. Setup has to run the static recompiler across the game and then compile the generated C++ code on your computer. This is a one-time process for a given installation/build.
 
-**Will you fix original bugs?**
-Not in the base game, behavior identical to real hardware is the goal. Only report things where this port differs
-from the original game. As for Retro Rewind, some base-game behavior **is** patched, so if it differs from the
-base game, that's normal. If Retro Rewind behavior differs between Dolphin/Wii and WiiCompiled, open an issue on GitHub.
+### Which game versions work?
 
-**How accurate are the physics?**
-100% - this is proven by in-game ghosts. Since ghosts are replay files based on inputs rather
-than tracked positions, matching ghosts prove the physics match across Dolphin/Wii/WiiCompiled.
+Only clean PAL `RMCP01`, NTSC-U `RMCE01`, and NTSC-J `RMCJ01` revisions are accepted. NTSC-K `RMCK01` and modified executables are rejected.
 
-**Is it done?**
-Not fully. The game is in a state where everything should be playable and the physics do match
-100% with the original game, but compatibility, rendering, networking and performance are all
-actively being worked on. If you do find an issue, we strongly encourage you to open one on
-GitHub so we can take a look at it.
+### Can the translator recompile other GameCube or Wii games?
+
+The translator itself works with DOL and REL files generically. A playable port also needs a suitable runtime for that game's hardware and software interfaces—graphics, audio, input, and anything else the game uses.
+
+### The game crashed or stopped with an error. What should I send?
+
+Errors are designed to be reported rather than silently swallowed. Include the error details and the run log from:
+
+```text
+%LOCALAPPDATA%\WiiCompiled\Logs
+```
+
+### Will original game bugs be fixed?
+
+The base game aims to behave like the original hardware. Report problems where WiiCompiled behaves differently from the original game, rather than bugs that are already present in the original.
+
+Retro Rewind changes some base-game behavior, so differences from the unmodified game may be intentional. If Retro Rewind behaves differently in WiiCompiled than it does on Wii or Dolphin, report that as a WiiCompiled compatibility issue.
+
+### How accurate are the physics?
+
+The project reports **100% physics parity** with the original game. The main evidence is matching in-game ghost replays: ghosts record player inputs rather than tracked positions, so matching replays across Wii, Dolphin, and WiiCompiled demonstrate that the simulation is behaving consistently.
+
+### Is the project finished?
+
+Not completely. The game is intended to be playable and the project's testing reports matching physics, but compatibility, rendering, networking, and performance remain active areas of development. Please open an issue when you encounter a problem so it can be investigated.
+
+---
 
 ## AI usage
-AI coding tools were used during development of this project. 
-All translated output is verified against real hardware behavior and most importantly, physics accuracy is proven synced across Wii, Dolphin, and WiiCompiled (see FAQ). 
 
+AI coding tools were used during development. Translated output is validated against real-hardware behavior, and the project's physics-parity testing is described above.
 
-## License
+---
 
-WiiCompiled is free software: you can redistribute it and/or modify it under the terms of the
-[GNU General Public License, version 3](LICENSE) as published by the Free Software Foundation.
+## Credits
 
-WiiCompiled is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
+- **[Patchzzy (@patchzyy)](https://github.com/patchzyy)** — creator of the original [WiiCompiled project](https://github.com/patchzyy/Wiicompiled), which this fork is based on.
+- **inkwreck** — original WiiCompiled logo artwork.
+- **[Aurora](https://github.com/encounter/aurora)** — the GameCube/Wii graphics and windowing compatibility layer used by the rendering backend.
+- **[Dawn](https://dawn.googlesource.com/dawn)** — Google's WebGPU implementation, used by Aurora's Direct3D, Vulkan, and OpenGL backends.
+- **[Dolphin Emulator](https://github.com/dolphin-emu/dolphin)** — an important reference for Wii hardware behavior and the source of third-party data files documented in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+- **[Retro Rewind](https://wiki.tockdom.com/wiki/Retro_Rewind)** by ZPL and its team — the mod distribution supported as a static profile.
+- **[Wheel Wizard](https://github.com/TeamWheelWizard/WheelWizard)** — the mod manager this project integrates with as a setup and launch backend.
+- The wider GameCube/Wii and static-recompilation communities.
 
-Any mkwii distribution making use of WiiCompiled must be licensed under GPL v3.0 or a more permissable license
+Third-party components, licenses, and redistribution notices are documented in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-Not affiliated with, endorsed by, or associated with Nintendo. Mario Kart Wii is a trademark of
-Nintendo. No Nintendo intellectual property is contained in, distributed with, or obtainable
-through this project.
+---
+
+## License and disclaimer
+
+WiiCompiled is free software distributed under the [GNU General Public License, version 3](LICENSE). It is provided in the hope that it will be useful, but **without any warranty**, including implied warranties of merchantability or fitness for a particular purpose. See the license for the full terms.
+
+Any Mario Kart Wii distribution that incorporates WiiCompiled must be licensed under GPL-3.0 or a more permissive license.
+
+This project is not affiliated with, endorsed by, or associated with Nintendo. Mario Kart Wii is a trademark of Nintendo. No Nintendo game code or game assets are distributed with this project.
