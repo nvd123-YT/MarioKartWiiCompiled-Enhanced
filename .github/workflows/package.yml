@@ -1,7 +1,7 @@
 name: Package installers
 
-# Builds the per-platform installer/setup tool (WiiCompiled-Setup.exe /
-# WiiCompiled-Setup-x86_64.AppImage / WiiCompiled-Setup.pkg) via the platform packaging scripts -
+# Builds the per-platform setup tool (WiiCompiled-Setup.exe /
+# WiiCompiled-Setup-x86_64.AppImage / WiiCompiled-Setup.dmg) via the platform packaging scripts -
 # the same scripts a maintainer runs by hand today to
 # produce a GitHub Release asset. This does NOT build the actual translated game executable:
 # that step requires the end user's own Mario Kart Wii dump (Assets/main.dol, Assets/StaticR.rel),
@@ -10,6 +10,10 @@ on:
   push:
     tags:
       - '*'
+  pull_request:
+    paths:
+      - ".github/workflows/package.yml"
+      - "Launcher/macos/**"
   workflow_dispatch:
     inputs:
       version:
@@ -26,10 +30,12 @@ concurrency:
 
 jobs:
   recompilation:
+    if: github.event_name != 'pull_request'
     name: Recompilation test
     uses: ./.github/workflows/recomp-test.yml
 
   linux-appimage:
+    if: github.event_name != 'pull_request'
     name: Linux (AppImage, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -74,6 +80,7 @@ jobs:
           archive: false
 
   windows-installer:
+    if: github.event_name != 'pull_request'
     name: Windows (installer exe)
     runs-on: windows-latest
     steps:
@@ -97,8 +104,8 @@ jobs:
           if-no-files-found: error
           archive: false
 
-  macos-setup-package:
-    name: macOS (universal Setup.pkg)
+  macos-setup-dmg:
+    name: macOS (universal drag-and-drop DMG)
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
@@ -181,7 +188,7 @@ jobs:
           tar -xzf "$archive"
           mv "cmake-${cmake_version}-macos-universal/CMake.app/Contents" Launcher/artifacts/macos/cmake
 
-      - name: Build Setup.pkg
+      - name: Build Setup.dmg
         env:
           PACKAGE_VERSION: ${{ inputs.version }}
           TAG_VERSION: ${{ github.ref_name }}
@@ -196,7 +203,7 @@ jobs:
             fi
           fi
           mkdir -p Launcher/dist
-          Launcher/macos/build-setup-pkg.command \
+          Launcher/macos/build-setup-dmg.command \
             --nodtool-arm64 Launcher/artifacts/macos/nodtool-arm64 \
             --nodtool-x86_64 Launcher/artifacts/macos/nodtool-x86_64 \
             --translator-arm64 Launcher/artifacts/macos/translator-arm64/Translator.Cli \
@@ -206,22 +213,25 @@ jobs:
             --cmake-root Launcher/artifacts/macos/cmake \
             --ninja-arm64 Launcher/artifacts/macos/ninja/ninja \
             --ninja-x86_64 Launcher/artifacts/macos/ninja/ninja \
-            --output Launcher/dist/WiiCompiled-Setup.pkg \
+            --output Launcher/dist/WiiCompiled-Setup.dmg \
             --run-output Launcher/dist/WiiCompiled-Setup-macos.run \
             ${package_version:+--version "$package_version"}
 
-      - name: Verify package layout and architecture-specific tools
+      - name: Verify DMG layout and architecture-specific tools
         shell: bash
         run: |
-          pkgutil --check-signature Launcher/dist/WiiCompiled-Setup.pkg || true
-          if pkgutil --payload-files Launcher/dist/WiiCompiled-Setup.pkg | \
-            grep -E '/(Assets|generated|PulsarPacks|WiiCompiled.app|RetroRewind.app)(/|$)'; then
-            echo "::error::Setup.pkg contains a forbidden payload"
-            exit 1
-          fi
-          expanded="$RUNNER_TEMP/wiicompiled-setup-expanded"
-          pkgutil --expand-full Launcher/dist/WiiCompiled-Setup.pkg "$expanded"
-          resources="$expanded/Payload/Applications/WiiCompiled Setup.app/Contents/Resources"
+          set -euo pipefail
+          dmg=Launcher/dist/WiiCompiled-Setup.dmg
+          mount="$RUNNER_TEMP/wiicompiled-setup-dmg"
+          mkdir -p "$mount"
+          hdiutil attach "$dmg" -readonly -nobrowse -mountpoint "$mount"
+          trap 'hdiutil detach "$mount" -quiet || true' EXIT
+          app="$mount/WiiCompiled Setup.app"
+          test -d "$app"
+          test -L "$mount/Applications"
+          test "$(readlink "$mount/Applications")" = /Applications
+          codesign --verify --deep --strict "$app"
+          resources="$app/Contents/Resources"
           for arch in arm64 x86_64; do
             for tool in nodtool Translator.Cli ninja; do
               lipo "$resources/tools/$arch/$tool" -verify_arch "$arch"
@@ -230,6 +240,8 @@ jobs:
           lipo "$resources/tools/cmake/bin/cmake" -verify_arch arm64 x86_64
           bash "$resources/setup.command" --help
           /usr/bin/arch -x86_64 /bin/bash "$resources/setup.command" --help
+          hdiutil detach "$mount" -quiet
+          trap - EXIT
           # The .run must answer --version without unpacking, then unpack once and run its entry point
           # with each architecture's setup CLI.
           run=Launcher/dist/WiiCompiled-Setup-macos.run
